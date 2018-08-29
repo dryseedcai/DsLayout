@@ -146,7 +146,10 @@ public class LayoutManager {
         }
     }
 
-
+    /**
+     * 获取layout资源文件目录，赋值给 mLayoutFile
+     * 1. 设置根目录路径 mRootFile eg:D:\CodeDs\DsLayout\app
+     */
     private void getLayoutPath() {
         try {
             JavaFileObject fileObject = mFiler.createSourceFile("bb");
@@ -156,17 +159,31 @@ public class LayoutManager {
                 path = path.substring(preFix.length() - 1);
             }
             File file = new File(path);
+
+            // D:\CodeDs\DsLayout\app\build\generated\source\apt\debug\bb.java
+            Log.w("getLayoutPath file : " + file.getAbsolutePath());
+            //bb.java
+            Log.w("getLayoutPath file.getName() : " + file.getName());
+
             while (!file.getName().equals("build")) {
                 file = file.getParentFile();
             }
             mRootFile = file.getParentFile();
             String sep = File.separator;
             mLayoutFile = new File(mRootFile.getAbsolutePath() + sep + "src" + sep + "main" + sep + "res" + sep + "layout");
+
+            // D:\CodeDs\DsLayout\app\src\main\res\layout
+            Log.w("getLayoutPath mLayoutFile : " + mLayoutFile.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * 通过 build.gradle 的 applicationId 获取 PackageName
+     *
+     * @return
+     */
     private String getPackageName() {
         File buildGradle = new File(mRootFile, "build.gradle");
         try {
@@ -218,8 +235,9 @@ public class LayoutManager {
         File rDir = new File(stringBuilder);
 
         File files[] = rDir.listFiles();
-        if (files == null)
+        if (files == null) {
             return null;
+        }
         File rFile = null;
         long time = 0;
         for (File file : files) {

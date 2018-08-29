@@ -23,7 +23,7 @@ import javax.lang.model.element.TypeElement;
 @SupportedAnnotationTypes("com.zhangyue.we.x2c.ano.Xml")
 public class XmlProcessor extends AbstractProcessor {
 
-    private int mGroupId =-1;
+    private int mGroupId = -1;
     private LayoutManager mLayoutMgr;
 
     @Override
@@ -46,8 +46,9 @@ public class XmlProcessor extends AbstractProcessor {
             }
         }
 
+        // eg : activity_main=0x7f09001b; -> mGroupId = 0x7f09
         for (Integer id : layouts) {
-            if (mGroupId == -1){
+            if (mGroupId == -1) {
                 mGroupId = (id >> 24);
             }
             mLayoutMgr.setGroupId(mGroupId);
