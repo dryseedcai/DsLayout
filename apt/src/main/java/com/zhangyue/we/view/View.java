@@ -18,11 +18,20 @@ public class View implements ITranslator {
     private View mParent;
     private ArrayList<View> mChilds;
     private String mViewStr;
+    /**
+     * view的标签名
+     */
     private String mTagName;
+    /**
+     * view的 SimpleClassName，eg:LinearLayout
+     */
     private String mName;
     private String mObjName;
     private String mLayoutParams;
     protected String mLayoutParamsObj;
+    /**
+     * xml解析出来的Attributes
+     */
     private Attributes mAttributes;
     private String mPackageName;
     protected TreeSet<String> mImports;
@@ -60,6 +69,23 @@ public class View implements ITranslator {
 
 
         mViewStr = generateView(mAttributes);
+        /*
+          mViewStr [name:LinearLayout]
+   	          Resources res = ctx.getResources();
+
+              LinearLayout linearLayout0 = new LinearLayout(ctx);
+              linearLayout0.setOrientation(LinearLayout.VERTICAL);
+         */
+        /*
+          mViewStr [name:TextView]
+              TextView textView1 = new TextView(ctx);
+              LinearLayout.LayoutParams layoutParam1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+              layoutParam1.gravity= Gravity.CENTER ;
+              textView1.setText("Hello World!");
+              textView1.setLayoutParams(layoutParam1);
+              linearLayout0.addView(textView1);
+         */
+        Log.w(String.format("mViewStr [name:%s] \n %s", mName, mViewStr));
     }
 
     public void addChilden(View child) {
@@ -69,6 +95,13 @@ public class View implements ITranslator {
         mChilds.add(child);
     }
 
+    /**
+     * 整合view构建代码
+     * 1. 将子view构建代码合并到stringBuffer
+     * 2. 将子view的mImports合并到mImports
+     *
+     * @param stringBuffer
+     */
     public void translate(StringBuffer stringBuffer) {
         stringBuffer.append(mViewStr);
         if (mChilds != null) {
@@ -83,6 +116,14 @@ public class View implements ITranslator {
         return mImports;
     }
 
+    /**
+     * View 的 SimpleClassName
+     * 1. 将View的 ClassName 放入了 mImports
+     * 2. return view 的 SimpleClassName
+     *
+     * @param name
+     * @return
+     */
     private String getName(String name) {
         if (!name.contains(".")) {
             switch (name) {
@@ -109,6 +150,12 @@ public class View implements ITranslator {
         return name.substring(name.lastIndexOf(".") + 1);
     }
 
+    /**
+     * 生成变量名
+     * 1. 首字母小写 + index , eg : linearLayout1
+     *
+     * @return
+     */
     public String getObjName() {
         if (mObjName == null) {
             View root = getRootView();
@@ -126,7 +173,12 @@ public class View implements ITranslator {
         return mLayoutParams;
     }
 
-
+    /**
+     * 构建生成View的Java代码
+     *
+     * @param attributes
+     * @return
+     */
     private String generateView(Attributes attributes) {
         StringBuffer stringBuffer = new StringBuffer();
         if (mParent == null) {
@@ -141,7 +193,7 @@ public class View implements ITranslator {
             stringBuffer.append(String.format("%s %s = new %s(ctx);\n", mName, obj, mName));
         }
 
-        mStyleAttributes = getStyleAttribute();
+        // 设置宽高
         String width = getWidth(getWidthStr());
         String height = getHeight(getHeightStr());
         if (mParent != null) {
@@ -150,6 +202,8 @@ public class View implements ITranslator {
                     , paramsName, width, height));
         }
 
+        // Style属性
+        mStyleAttributes = getStyleAttribute();
         ArrayList<ITranslator> translators = createTranslator();
         if (mStyleAttributes != null) {
             for (String styleKey : mStyleAttributes.keySet()) {
@@ -161,6 +215,7 @@ public class View implements ITranslator {
             }
         }
 
+        // Xml Attribute 属性
         String key;
         String value;
         int N = attributes.getLength();
@@ -174,15 +229,18 @@ public class View implements ITranslator {
             }
         }
 
+        // Xml Attribute 属性处理完成回调
         for (ITranslator translator : translators) {
             translator.onAttributeEnd(stringBuffer);
         }
 
+        // view 添加到 parentView 中
         if (mParent != null) {
             stringBuffer.append(String.format("%s.setLayoutParams(%s);\n", obj, mLayoutParamsObj));
             stringBuffer.append(String.format("%s.addView(%s);\n", mParent.getObjName(), obj));
         }
 
+        // setPadding
         if (!mPadding.equals("0")) {
             stringBuffer.append(getObjName()).append(String.format(".setPadding(%s,%s,%s,%s);\n", mPadding, mPadding, mPadding, mPadding));
         } else if (!mPaddingLeft.equals("0") || !mPaddingTop.equals("0") || !mPaddingRight.equals("0") || !mPaddingBottom.equals("0")) {
@@ -190,6 +248,7 @@ public class View implements ITranslator {
         }
         stringBuffer.append("\n");
 
+        // fragment
         if (mTagName.equals("fragment")) {
 
             if (mId == null) {
@@ -219,6 +278,11 @@ public class View implements ITranslator {
         return stringBuffer.toString();
     }
 
+    /**
+     * 通过xml属性获取宽度值
+     *
+     * @return
+     */
     private String getWidthStr() {
         if (mAttributes == null) {
             return "";
@@ -233,6 +297,11 @@ public class View implements ITranslator {
         return null;
     }
 
+    /**
+     * 通过xml属性获取高度值
+     *
+     * @return
+     */
     private String getHeightStr() {
         if (mAttributes == null) {
             return "";
@@ -565,6 +634,12 @@ public class View implements ITranslator {
         return getWH(value);
     }
 
+    /**
+     * 宽高属性值转义
+     *
+     * @param value
+     * @return
+     */
     public static String getWH(String value) {
         if (value == null) {
             return "0";
@@ -713,7 +788,6 @@ public class View implements ITranslator {
         }
     }
 
-
     private String getIncludeLayout() {
         String layout = mAttributes.getValue("layout");
         return layout.substring(layout.lastIndexOf("/") + 1);
@@ -727,6 +801,11 @@ public class View implements ITranslator {
         return root;
     }
 
+    /**
+     * 获取Style属性
+     *
+     * @return
+     */
     private HashMap<String, String> getStyleAttribute() {
         if (mAttributes == null || mStyleAttributes != null) {
             return mStyleAttributes;

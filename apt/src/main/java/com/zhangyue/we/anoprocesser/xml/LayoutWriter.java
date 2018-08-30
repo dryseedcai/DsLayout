@@ -18,6 +18,9 @@ import javax.lang.model.element.Modifier;
 public class LayoutWriter {
     private Filer mFiler;
     private String mName;
+    /**
+     * 生成方法的具体代码
+     */
     private String mMethodSpec;
     private String mPkgName;
     private String mLayoutName;
@@ -62,3 +65,36 @@ public class LayoutWriter {
         }
     }
 }
+
+/*
+    Code Example :
+        public class X2C_127_Activity_Main implements IViewCreator {
+            @Override
+            public View createView(Context ctx, int layoutId) {
+                Resources res = ctx.getResources();
+
+                LinearLayout linearLayout0 = new LinearLayout(ctx);
+                linearLayout0.setOrientation(LinearLayout.VERTICAL);
+
+
+                TextView textView1 = new TextView(ctx);
+                LinearLayout.LayoutParams layoutParam1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                layoutParam1.gravity= Gravity.CENTER ;
+                textView1.setText("Hello World!");
+                textView1.setLayoutParams(layoutParam1);
+                linearLayout0.addView(textView1);
+
+
+                Button button2 = new Button(ctx);
+                LinearLayout.LayoutParams layoutParam2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,(int)(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,50,res.getDisplayMetrics())));
+                layoutParam2.topMargin= (int)(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,40,res.getDisplayMetrics())) ;
+                button2.setGravity(Gravity.CENTER);
+                button2.setText("button");
+                button2.setLayoutParams(layoutParam2);
+                linearLayout0.addView(button2);
+
+
+                return linearLayout0;
+            }
+        }
+ */

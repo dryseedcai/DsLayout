@@ -68,3 +68,22 @@ public class MapWriter {
         }
     }
 }
+
+/*
+    Code Example :
+        public class X2C_127 implements IViewCreator {
+          @Override
+          public View createView(Context context, int layoutId) {
+                View view;
+                switch(layoutId){
+                    case 2131296283:
+                        view = new X2C_127_Activity_Main().createView(context,2131296283);
+                        break;
+                    default:
+                        view = null;
+                        break;
+                }
+                return view;
+          }
+        }
+ */
