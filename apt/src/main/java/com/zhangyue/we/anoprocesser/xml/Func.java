@@ -1,7 +1,5 @@
 package com.zhangyue.we.anoprocesser.xml;
 
-import com.zhangyue.we.anoprocesser.Log;
-
 /**
  * @author：chengwei 2018/8/25
  * @description

@@ -1,5 +1,6 @@
 package com.zhangyue.we.anoprocesser.xml;
 
+import com.zhangyue.we.anoprocesser.Log;
 import com.zhangyue.we.view.View;
 
 import org.xml.sax.Attributes;
@@ -33,8 +34,14 @@ public class LayoutReader {
         mName = getJavaName(groupId, name);
     }
 
+    /**
+     * 解析xml文件， 将java poet生成的代码写入mFiler
+     *
+     * @return
+     */
     public String parse() {
         try {
+            // xmlFile : E:\CodeDs\DsLayout\app\src\main\res\layout\activity_main.xml
             File xmlFile = new File(mFile + File.separator + mLayoutName + ".xml");
             mParser = SAXParserFactory.newInstance().newSAXParser();
             mParser.parse(xmlFile, new XmlHandler());
@@ -57,6 +64,10 @@ public class LayoutReader {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             View view = createView(qName, attributes);
+            /**
+             * 1. 设置view的parent
+             * 2. setParent 方法会调用 view.generateView(mAttributes) 生成view的构建代码
+             */
             if (mStack.size() > 0) {
                 view.setParent(mStack.get(mStack.size() - 1));
             } else {
@@ -74,10 +85,13 @@ public class LayoutReader {
             if (mStack.size() == 0) {
                 mRootView = view;
                 StringBuffer stringBuffer = new StringBuffer();
+                // 整合mRootView的构建代码
                 mRootView.translate(stringBuffer);
                 stringBuffer.append("return ").append(mRootView.getObjName());
+                // java poet 生成java代码
                 LayoutWriter writer = new LayoutWriter(stringBuffer.toString(), mFiler, mName, mPackageName
                         , mLayoutName, mRootView.getImports());
+                Log.w(String.format("endElement [name:%s] \n %s", mName, stringBuffer.toString()));
                 writer.write();
             }
         }
@@ -92,6 +106,15 @@ public class LayoutReader {
         return new View(mPackageName, name, attributes);
     }
 
+    /**
+     * 生成 JavaName
+     * 1. groupId = 127 ; name = "activity_main"
+     * 2. return "X2C_127_Activity_Main"
+     *
+     * @param groupId
+     * @param name
+     * @return
+     */
     private String getJavaName(int groupId, String name) {
         String retName = groupId + "_" + name;
         String[] ss = retName.split("_");

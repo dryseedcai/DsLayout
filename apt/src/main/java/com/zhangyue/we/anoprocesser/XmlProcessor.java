@@ -30,12 +30,14 @@ public class XmlProcessor extends AbstractProcessor {
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
         Log.init(processingEnvironment.getMessager());
+        Log.w("XmlProcessor init");
         mLayoutMgr = LayoutManager.instance();
         mLayoutMgr.setFiler(processingEnvironment.getFiler());
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
+        Log.w("XmlProcessor process");
         Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(Xml.class);
         TreeSet<Integer> layouts = new TreeSet<>();
         for (Element element : elements) {
@@ -46,15 +48,17 @@ public class XmlProcessor extends AbstractProcessor {
             }
         }
 
-        // eg : activity_main=0x7f09001b; -> mGroupId = 0x7f09
+        // 十六进制一位四个字节，eg : activity_main=0x7f09001b; -> mGroupId = 0x7f
         for (Integer id : layouts) {
             if (mGroupId == -1) {
                 mGroupId = (id >> 24);
             }
             mLayoutMgr.setGroupId(mGroupId);
+            // 翻译、生成布局代码
             mLayoutMgr.translate(mLayoutMgr.getLayoutName(id));
         }
 
+        //生成布局id映射代码
         mLayoutMgr.generateMap();
         return false;
     }

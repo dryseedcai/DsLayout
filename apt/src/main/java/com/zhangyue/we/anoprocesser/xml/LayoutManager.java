@@ -17,8 +17,17 @@ import javax.tools.JavaFileObject;
 public class LayoutManager {
 
     private static LayoutManager sInstance;
+    /**
+     * 根目录 D:\CodeDs\DsLayout\app
+     */
     private File mRootFile;
+    /**
+     * 资源文件 D:\CodeDs\DsLayout\app\src\main\res\layout
+     */
     private File mLayoutFile;
+    /**
+     * 包名 com.dryseed.dslayout
+     */
     private String mPackageName;
     private int mGroupId;
     private Filer mFiler;
@@ -31,7 +40,7 @@ public class LayoutManager {
      */
     private HashMap<String, Integer> mRJava;
     /**
-     * key is layoutName,value is layoutId
+     * key is layoutId,value is layoutName
      */
     private HashMap<Integer, String> mRJavaId;
     /**
@@ -39,12 +48,12 @@ public class LayoutManager {
      */
     private HashMap<String, Style> mStyles;
     /**
-     * key is layoutName,value is javaName
+     * key is layoutName.xml,value is javaName.java
      */
     private HashMap<String, String> mTranslateMap;
 
     /**
-     * key is attrName,value is attr
+     * 自定义属性，key is attrName,value is attr
      */
     private HashMap<String, Attr> mAttrs;
 
@@ -77,6 +86,13 @@ public class LayoutManager {
         this.mGroupId = groupId;
     }
 
+    /**
+     * 根据 layoutId 获取 layoutName
+     * 1. 查找映射表mRJavaId
+     *
+     * @param id
+     * @return
+     */
     public String getLayoutName(int id) {
         return mRJavaId.get(id);
     }
@@ -85,6 +101,14 @@ public class LayoutManager {
         return mRJava.get(layoutName);
     }
 
+    /**
+     * 解析xml，生成代码
+     * 1. 设置mMap（layoutId : fileName）
+     * 2. 设置mTranslateMap（fileName.java : layoutName.xml）
+     *
+     * @param layoutName
+     * @return
+     */
     public String translate(String layoutName) {
         String fileName;
         Integer layoutId = getLayoutId(layoutName);
@@ -109,6 +133,9 @@ public class LayoutManager {
         return mStyles.get(name);
     }
 
+    /**
+     * 生成资源id映射java文件
+     */
     public void generateMap() {
         printTranslate();
 
@@ -118,6 +145,9 @@ public class LayoutManager {
         mTranslateMap.clear();
     }
 
+    /**
+     * 打印映射表
+     */
     private void printTranslate() {
         if (mTranslateMap.size() == 0) {
             return;
@@ -147,7 +177,7 @@ public class LayoutManager {
     }
 
     /**
-     * 获取layout资源文件目录，赋值给 mLayoutFile
+     * 获取layout资源文件目录，赋值给 mLayoutFile (D:\CodeDs\DsLayout\app\src\main\res\layout)
      * 1. 设置根目录路径 mRootFile eg:D:\CodeDs\DsLayout\app
      */
     private void getLayoutPath() {
@@ -200,6 +230,14 @@ public class LayoutManager {
         return null;
     }
 
+    /**
+     * 获取 layoutName 和 layoutId 的映射关系
+     * 1. 获取R.java文件
+     * 2. 解析R.java文件，设置 mRJavaId （layoutId:layoutName）
+     * 3. 设置 return map （layoutName:layoutId）
+     *
+     * @return
+     */
     private HashMap<String, Integer> getR() {
         HashMap<String, Integer> map = new HashMap<>();
         File rFile = getRFile();
@@ -214,6 +252,7 @@ public class LayoutManager {
                     if (line.contains("}")) {
                         break;
                     } else {
+                        // line eg : public static final int activity_main=0x7f09001b;
                         line = line.substring(line.lastIndexOf(" ") + 1, line.indexOf(";"));
                         String ss[] = line.split("=");
                         int id = Integer.decode(ss[1]);
@@ -228,6 +267,11 @@ public class LayoutManager {
         return map;
     }
 
+    /**
+     * 获取R.java文件
+     *
+     * @return
+     */
     private File getRFile() {
         String sep = File.separator;
         String stringBuilder = mRootFile.getAbsolutePath() + sep + "build" + sep +

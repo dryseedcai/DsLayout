@@ -53,6 +53,15 @@ public class X2C {
         }
     }
 
+    /**
+     * 根据layout id，创建对应的view
+     * 1. 获取groupId
+     * 2. 通过反射，创建View，className为 X2C_groupId
+     *
+     * @param context
+     * @param layoutId
+     * @return
+     */
     public static View getView(Context context, int layoutId) {
         int group = generateGroupId(layoutId);
         IViewCreator creator = sSparseArray.get(group);
